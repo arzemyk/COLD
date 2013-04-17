@@ -1,0 +1,4 @@
+127.0.0.1:10001 : example.beans.council, example.beans.varys, example.beans.littlefinger
+127.0.0.1:10002 : example.beans.ned.stark, example.beans.jon.snow
+127.0.0.1:10003 : example.beans.joffrey, example.beans.ilyn
+127.0.0.1:10004 : example.beans.iron.throne
