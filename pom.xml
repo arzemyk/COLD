@@ -15,6 +15,7 @@
 	<com.typesafe.akka.version>2.1.2</com.typesafe.akka.version>
 	<junit.version>3.8.1</junit.version>
 	<org.springframework.version>3.1.1.RELEASE</org.springframework.version>
+	<javassist.version>3.12.1.GA</javassist.version>
 	
   </properties>
 
@@ -39,6 +40,12 @@
       <version>${com.typesafe.akka.version}</version>
     </dependency>
 
+
+	<dependency>
+	  <groupId>javassist</groupId>
+	  <artifactId>javassist</artifactId>
+	  <version>${javassist.version}</version>
+	</dependency>
 
   </dependencies>
 </project>
