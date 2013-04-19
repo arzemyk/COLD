@@ -1,4 +1,5 @@
 from xml.dom import minidom
+import os
 
 class ConfigParser(object):
 
@@ -11,7 +12,7 @@ class ConfigParser(object):
         self.class_id = {}
         self.files_map = {}
         self.d = minidom.Document()
-        self.location = 'src/main/resources/'
+        self.location = ''
 
     def read_node_config(self):
         config = open(self.node_config, mode='r')
@@ -28,7 +29,7 @@ class ConfigParser(object):
 
     def create_file_for_node(self, url):
         number = len(self.new_xml)
-        original_name = self.original_xml.split("/")[-1]
+        (_, original_name) = os.path.split(self.original_xml)
         new_name = original_name[:-4] + str(number) + original_name[-4:]
         self.files_map[url] = new_name
         self.new_xml[url] = open(self.location+new_name, mode='w')
