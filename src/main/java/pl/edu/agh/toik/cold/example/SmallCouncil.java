@@ -10,15 +10,11 @@ public class SmallCouncil {
 		this.members = members;
 	}
 
-	public int getVotes(String problem) {
-		int positiveVotes = 0;
+	public void vote(String problem) {
 		for (SmallCouncilMember member : members) {
-			if (member.vote(problem)) {
-				positiveVotes++;
-			}
+			member.vote(problem);
+
 		}
-		
-		return positiveVotes;
 	}
 
 }

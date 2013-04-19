@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 
+import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 
@@ -18,29 +19,30 @@ public class ProxyStubFactory {
 
 		ProxyFactory factory = new ProxyFactory();
 		factory.setSuperclass(klass);
+		
+		factory.setFilter(new MethodFilter() {
+
+			@Override
+			public boolean isHandled(Method method) {
+				return method.getReturnType() == void.class;
+			}
+		});
 
 		MethodHandler handler = new MethodHandler() {
 			@Override
 			public Object invoke(Object self, Method thisMethod,
 					Method proceed, Object[] args) throws Throwable {
-				
+
 				System.out.println(String.format(
 						"Handling %s for remote bean %s", thisMethod, beanId));
-				
+
 				Class<?> returnType = thisMethod.getReturnType();
 
-				if (returnType == boolean.class) {
-					return false;
-				} 
-				
-				if (returnType == int.class) {
-					return 0;
-				} 
-				
-				if (returnType == float.class) {
-					return 0.0;
-				} 
-				
+				if (returnType != void.class) {
+					throw new UnsupportedOperationException(
+							"Cannot remotely invoke method with non-void return type.");
+				}
+
 				return null;
 			}
 		};
@@ -64,5 +66,4 @@ public class ProxyStubFactory {
 		return proxyStub;
 
 	}
-
 }
