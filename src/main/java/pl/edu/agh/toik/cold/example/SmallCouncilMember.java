@@ -6,10 +6,9 @@ public class SmallCouncilMember extends Lord {
 	private King king;
 	
 	
-	public boolean vote(String query) {
+	public void vote(String query) {
 		spider.spy(this, " is a hypocrite so he informs king about king's hand move");
 		king.judge(query);
-		return false;
 	}
 	
 	

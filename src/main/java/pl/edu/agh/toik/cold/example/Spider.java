@@ -13,8 +13,7 @@ public class Spider extends SmallCouncilMember {
 	}
 	
 	@Override
-	public boolean vote(String query) {
-		return true;
+	public void vote(String query) {
 	}
 }
 

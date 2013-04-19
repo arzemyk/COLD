@@ -9,3 +9,11 @@
 /.project
 
 /target
+
+/.settings/org.eclipse.jdt.core.prefs
+
+/notatki.txt
+/scripts/.idea
+/scripts/nodes
+
+/scripts/*.pyc

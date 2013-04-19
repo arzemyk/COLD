@@ -16,9 +16,24 @@
 	<junit.version>3.8.1</junit.version>
 	<org.springframework.version>3.1.1.RELEASE</org.springframework.version>
 	<javassist.version>3.12.1.GA</javassist.version>
+	<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
 	
   </properties>
-
+  
+  <build>
+  <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+	</build>
+	
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -46,6 +61,9 @@
 	  <artifactId>javassist</artifactId>
 	  <version>${javassist.version}</version>
 	</dependency>
+	
+	
 
   </dependencies>
+  
 </project>
