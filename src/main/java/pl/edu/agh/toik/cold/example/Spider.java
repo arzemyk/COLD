@@ -4,8 +4,8 @@ public class Spider extends SmallCouncilMember {
 
 	StringBuilder littleBirdsReport = new StringBuilder();
 	
-	public void spy(WesterosCitizen who, String message) {
-		littleBirdsReport.append(who.getName() + " : " + message + "\n");
+	public void spy(String who, String message) {
+		littleBirdsReport.append(who + " : " + message + "\n");
 	}
 	
 	public String getLittleBirdsReport() {

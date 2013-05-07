@@ -7,7 +7,7 @@ public class Bastard extends WesterosCitizen {
 	
 	
 	public void goToTheWall() {
-		spider.spy(this, "goes to the Wall, because " + reasonOfPunishment);
+		spider.spy(getName(), "goes to the Wall, because " + reasonOfPunishment);
 	}
 	
 	public void setReasonOfPunishment(String reasonOfPunishment) {
