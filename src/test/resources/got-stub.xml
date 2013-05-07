@@ -24,8 +24,10 @@
 			<ref bean="cold.proxyActorSystem" />
 		</constructor-arg>
 		<constructor-arg>
-			<value>akka://ColdSystem@127.0.0.1:2553/user/example.beans.varys
-			</value>
+			<value>127.0.0.1</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>2553</value>
 		</constructor-arg>
 	</bean>
 

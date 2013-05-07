@@ -18,7 +18,7 @@ public class ProxyActorSystem {
 		Config config = ConfigFactory.parseString(
 				String.format("akka.remote.netty.hostname=\"%s\"\n"
 						+ "akka.remote.netty.port=\"%d\"\n"
-						+ "akka.actor.provider = \"akka.remote.RemoteActorRefProvider\"",
+						+ "akka.actor.provider = \"akka.remote.RemoteActorRefProvider\"\n",
 						hostname, port)).withFallback(ConfigFactory.load());
 
 		actorSystem = ActorSystem.create("ColdSystem", config);

@@ -9,17 +9,17 @@ public class MethodInvocation implements Serializable {
 	private Class<?> targetClass;
 	private String targetMethodName;
 	private String beanId;
-	private Class<?>[] argumentTypes;
-	private Object[] argumentValues;
+	private Class<?>[] parametersTypes;
+	private Object[] parametersValues;
 
 	public MethodInvocation(Class<?> targetClass, String targetMethodName,
-			String beanId, Class<?>[] argumentTypes, Object[] argumentValues) {
+			String beanId, Class<?>[] parametersTypes, Object[] parametersValues) {
 
 		this.targetClass = targetClass;
 		this.targetMethodName = targetMethodName;
 		this.beanId = beanId;
-		this.argumentTypes = argumentTypes;
-		this.argumentValues = argumentValues;
+		this.parametersTypes = parametersTypes;
+		this.parametersValues = parametersValues;
 	}
 
 	public Class<?> getTargetClass() {
@@ -34,12 +34,12 @@ public class MethodInvocation implements Serializable {
 		return beanId;
 	}
 
-	public Class<?>[] getArgumentTypes() {
-		return argumentTypes;
+	public Class<?>[] getParametersTypes() {
+		return parametersTypes;
 	}
 
-	public Object[] getArgumentValues() {
-		return argumentValues;
+	public Object[] getParametersValues() {
+		return parametersValues;
 	}
 
 }

@@ -13,10 +13,11 @@ import javassist.util.proxy.ProxyFactory;
 public class ProxyStubFactory {
 
 	public static Object createProxyStub(Class<?> klass, final String beanId,
-			final ProxyActorSystem proxyActorSystem, final String remotePath) {
+			final ProxyActorSystem proxyActorSystem, final String remoteHost,
+			final int remotePort) {
 
 		if (klass == null || beanId == null || proxyActorSystem == null
-				|| remotePath == null) {
+				|| remoteHost == null) {
 			throw new InvalidParameterException("No paramaters can be null.");
 		}
 
@@ -36,8 +37,8 @@ public class ProxyStubFactory {
 			public Object invoke(Object self, Method thisMethod,
 					Method proceed, Object[] args) throws Throwable {
 
-				System.out.println(String.format(
-						"Handling %s for remote bean %s", thisMethod, beanId));
+				// System.out.println(String.format(
+				// "Handling %s for remote bean %s", thisMethod, beanId));
 
 				Class<?> returnType = thisMethod.getReturnType();
 
@@ -47,12 +48,17 @@ public class ProxyStubFactory {
 				}
 
 				MethodInvocation methodInvocation = new MethodInvocation(
-						thisMethod.getClass(), thisMethod.getName(), beanId,
-						thisMethod.getParameterTypes(), args);
+						thisMethod.getDeclaringClass(), thisMethod.getName(),
+						beanId, thisMethod.getParameterTypes(), args);
+
+				String remotePath = String.format(
+						"akka://ColdSystem@%s:%d/user/%s", remoteHost,
+						remotePort, beanId);
 
 				ActorRef remoteActor = proxyActorSystem.getActorSystem()
 						.actorFor(remotePath);
 				remoteActor.tell(methodInvocation, null);
+
 				return null;
 			}
 		};

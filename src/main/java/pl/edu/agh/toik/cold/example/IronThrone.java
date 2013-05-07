@@ -18,7 +18,7 @@ public class IronThrone {
 		kingsHand.punishBastard();
 		kingsHand.askSmallCouncil();
 		
-		System.out.println(spider.getLittleBirdsReport());
+		spider.printLittleBirdsReport();
 	}
 	
 	private void happyScenario() {

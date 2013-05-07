@@ -56,9 +56,9 @@ public class ProxySkeleton {
 		try {
 			method = targetObject.getClass().getMethod(
 					methodInvocation.getTargetMethodName(),
-					methodInvocation.getArgumentTypes());
+					methodInvocation.getParametersTypes());
 
-			method.invoke(targetObject, methodInvocation.getArgumentValues());
+			method.invoke(targetObject, methodInvocation.getParametersValues());
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
