@@ -7,7 +7,7 @@ public class SmallCouncilMember extends Lord {
 	
 	
 	public void vote(String query) {
-		spider.spy(this, " is a hypocrite so he informs king about king's hand move");
+		spider.spy(getName(), " is a hypocrite so he informs king about king's hand move");
 		king.judge(query);
 	}
 	

@@ -18,7 +18,7 @@ public class King extends WesterosCitizen {
 
 	public void judge(String information) {
 		if(isPsychopathic) {
-			spider.spy(this, "is psychopatic monster so he decides to kill " + kingsHand.getName());
+			spider.spy(getName(), "is psychopatic monster so he decides to kill " + kingsHand.getName());
 			bringMeHisHead(kingsHand);
 		}
 	}

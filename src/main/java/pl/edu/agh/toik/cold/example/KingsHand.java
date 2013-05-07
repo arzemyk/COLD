@@ -6,7 +6,7 @@ public class KingsHand extends Lord {
 	private SmallCouncil council;
 	
 	public void askSmallCouncil() {
-		spider.spy(this, "reveals that " + problemToSolve + " and tells it to small council.");
+		spider.spy(getName(), "reveals that " + problemToSolve + " and tells it to small council.");
 		council.vote(problemToSolve);
 	}
 	
