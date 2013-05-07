@@ -161,7 +161,8 @@ class ConfigParser(object):
         for url in self.new_xml_content:
             head = self.new_xml_content[url]
             xml = head.toprettyxml('\t')
-            xml = ''.join([s for s in xml.splitlines(True) if s.strip("\t\r\n")])
+            xml = ''.join([s for s in xml.splitlines(True) if s.strip()])
+
             self.new_xml_files[url].write(xml)
 
         for file in self.new_xml_files.values():
