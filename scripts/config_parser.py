@@ -40,8 +40,8 @@ class ConfigParser(object):
         new_name = original_name[:-4] + str(number) + original_name[-4:]
         self.files_map[url] = new_name
         self.new_xml_files[url] = open(self.location+new_name, mode='w')
-        self.new_xml_files[url].write('<!--' + url + '-->\n')
         self.new_xml_files[url].write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        self.new_xml_files[url].write('<!--' + url + '-->\n')
 
     def parse_xml(self):
         xml = minidom.parse(self.original_xml)
