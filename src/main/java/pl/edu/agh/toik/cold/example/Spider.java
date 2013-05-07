@@ -8,8 +8,8 @@ public class Spider extends SmallCouncilMember {
 		littleBirdsReport.append(who + " : " + message + "\n");
 	}
 	
-	public String getLittleBirdsReport() {
-		return littleBirdsReport.toString();
+	public void printLittleBirdsReport() {
+		System.out.println(littleBirdsReport.toString());
 	}
 	
 	@Override

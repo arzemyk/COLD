@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="cold.proxyActorSystem" class="pl.edu.agh.toik.cold.proxy.ProxyActorSystem">
+		<constructor-arg>
+			<value>127.0.0.1</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>2552</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="example.beans.varys" class="pl.edu.agh.toik.cold.proxy.ProxyStubFactory"
+		factory-method="createProxyStub">
+		<constructor-arg>
+			<value>pl.edu.agh.toik.cold.example.Spider</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>example.beans.varys</value>
+		</constructor-arg>
+		<constructor-arg>
+			<ref bean="cold.proxyActorSystem" />
+		</constructor-arg>
+		<constructor-arg>
+			<value>127.0.0.1</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>2553</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="example.beans.littlefinger" class="pl.edu.agh.toik.cold.example.SmallCouncilMember">
+		<property value="Littlefinger" name="name"></property>
+		<property name="spider" ref="example.beans.varys"></property>
+		<property name="king" ref="example.beans.joffrey"></property>
+	</bean>
+
+	<bean id="example.beans.small.council" class="pl.edu.agh.toik.cold.example.SmallCouncil">
+		<constructor-arg>
+			<list>
+				<ref bean="example.beans.varys" />
+				<ref bean="example.beans.littlefinger" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="example.beans.jon.snow" class="pl.edu.agh.toik.cold.example.Bastard">
+		<property name="reasonOfPunishment" value="he knows nothing"></property>
+		<property name="name" value="Jon Snow"></property>
+		<property name="spider" ref="example.beans.varys"></property>
+	</bean>
+
+	<bean id="example.beans.ned.stark" class="pl.edu.agh.toik.cold.example.KingsHand">
+		<property name="council" ref="example.beans.small.council"></property>
+		<property name="problemToSolve"
+			value="Joffrey is a blondie so he cannot be son of Robert so he is a son of Cersei and her brother Jaime,">
+		</property>
+		<property name="name" value="Ned Stark"></property>
+		<property name="spider" ref="example.beans.varys"></property>
+
+		<property name="bastard" ref="example.beans.jon.snow"></property>
+	</bean>
+
+	<bean id="example.beans.ser.ilyn" class="pl.edu.agh.toik.cold.example.Executioner">
+		<property name="name" value="ser Ilyn"></property>
+		<property name="spider" ref="example.beans.varys"></property>
+	</bean>
+
+	<bean id="example.beans.joffrey" class="pl.edu.agh.toik.cold.example.King">
+		<property name="executioner" ref="example.beans.ser.ilyn"></property>
+		<property name="kingsHand" ref="example.beans.ned.stark"></property>
+		<property name="name" value="Joffrey"></property>
+		<property name="spider" ref="example.beans.varys"></property>
+		<constructor-arg value="true"></constructor-arg>
+	</bean>
+
+	<bean id="example.beans.iron.throne" class="pl.edu.agh.toik.cold.example.IronThrone">
+		<property name="kingsHand" ref="example.beans.ned.stark"></property>
+		<property name="spider" ref="example.beans.varys"></property>
+	</bean>
+
+</beans>

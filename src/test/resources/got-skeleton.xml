@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="cold.proxyActorSystem" class="pl.edu.agh.toik.cold.proxy.ProxyActorSystem">
+		<constructor-arg>
+			<value>127.0.0.1</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>2553</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="example.beans.varys" class="pl.edu.agh.toik.cold.example.Spider">
+		<property name="name" value="Varys"></property>
+	</bean>
+
+	<bean id="example.beans.varys.skeleton" class="pl.edu.agh.toik.cold.proxy.ProxySkeleton">
+		<constructor-arg>
+			<ref bean="example.beans.varys" />
+		</constructor-arg>
+		<constructor-arg>
+			<ref bean="cold.proxyActorSystem" />
+		</constructor-arg>
+		<constructor-arg>
+			<value>example.beans.varys</value>
+		</constructor-arg>
+	</bean>
+
+</beans>
