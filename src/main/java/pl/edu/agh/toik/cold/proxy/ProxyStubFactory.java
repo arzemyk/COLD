@@ -15,14 +15,9 @@ public class ProxyStubFactory {
 	public static Object createProxyStub(Class<?> klass, final String beanId,
 			final ProxyActorSystem proxyActorSystem, final String remotePath) {
 
-		if (klass == null || beanId == null) {
-			throw new InvalidParameterException(
-					"Neither klass nor beanId can be null");
-		}
-
-		if (proxyActorSystem == null) {
-			throw new InvalidParameterException(
-					"proxyActorSystem cannot be null.");
+		if (klass == null || beanId == null || proxyActorSystem == null
+				|| remotePath == null) {
+			throw new InvalidParameterException("No paramaters can be null.");
 		}
 
 		ProxyFactory factory = new ProxyFactory();
@@ -52,10 +47,11 @@ public class ProxyStubFactory {
 				}
 
 				MethodInvocation methodInvocation = new MethodInvocation(
-						thisMethod.getClass(), beanId,
+						thisMethod.getClass(), thisMethod.getName(), beanId,
 						thisMethod.getParameterTypes(), args);
 
-				ActorRef remoteActor = proxyActorSystem.getActorSystem().actorFor(remotePath); 
+				ActorRef remoteActor = proxyActorSystem.getActorSystem()
+						.actorFor(remotePath);
 				remoteActor.tell(methodInvocation, null);
 				return null;
 			}
