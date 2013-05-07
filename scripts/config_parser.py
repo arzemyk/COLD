@@ -156,7 +156,9 @@ class ConfigParser(object):
     def close_xml(self):
         for url in self.new_xml_content:
             head = self.new_xml_content[url]
-            head.writexml(self.new_xml_files[url], '', '\t', '\n')
+            xml = head.toprettyxml('\t')
+            xml = ''.join([s for s in xml.splitlines(True) if s.strip("\t\r\n")])
+            self.new_xml_files[url].write(xml)
 
         for file in self.new_xml_files.values():
             file.close()
