@@ -7,12 +7,15 @@ class ConfigParser(object):
         self.original_xml = original_xml
         self.node_config = node_config
         self.node_map = {}
-        self.new_xml = {}
+        self.new_xml_files = {}
+        self.new_xml_content = {}
         self.beans_map = {}
         self.class_id = {}
         self.files_map = {}
         self.d = minidom.Document()
         self.location = ''
+        self.skeleton_nodes = {}
+        self.factory_nodes = {}
 
     def read_node_config(self):
         config = open(self.node_config, mode='r')
@@ -28,13 +31,13 @@ class ConfigParser(object):
         config.close()
 
     def create_file_for_node(self, url):
-        number = len(self.new_xml)
+        number = len(self.new_xml_files)
         (_, original_name) = os.path.split(self.original_xml)
         new_name = original_name[:-4] + str(number) + original_name[-4:]
         self.files_map[url] = new_name
-        self.new_xml[url] = open(self.location+new_name, mode='w')
-        self.new_xml[url].write('<!--' + url + '-->\n')
-        self.new_xml[url].write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        self.new_xml_files[url] = open(self.location+new_name, mode='w')
+        self.new_xml_files[url].write('<!--' + url + '-->\n')
+        self.new_xml_files[url].write('<?xml version="1.0" encoding="UTF-8"?>\n')
 
     def parse_xml(self):
         xml = minidom.parse(self.original_xml)
@@ -49,10 +52,14 @@ class ConfigParser(object):
             self.class_id[id] = clazz
             print 'bean', bean.attributes['id'].value
 
-        self.ref_nodes = {}
-        for url in self.new_xml:
+        for url in self.new_xml_files:
             print url
+
             head = xml_head[0].cloneNode(False)
+
+            proxy_actor_system = self.create_proxy_actor_system(url)
+
+            head.appendChild(proxy_actor_system)
 
             used_nodes = []
 
@@ -65,7 +72,14 @@ class ConfigParser(object):
                 head.appendChild(new_node)
                 print used_nodes
 
-            head.writexml(self.new_xml[url], '', '\t', '\n')
+            self.new_xml_content[url] = head
+
+    def add_skeletons(self):
+        for url in self.new_xml_content:
+            head = self.new_xml_content[url]
+            for id in self.node_map[url]:
+                if id in self.skeleton_nodes:
+                    head.appendChild(self.skeleton_nodes[id])
 
     def check_references(self, url, xml_node, used_nodes, head):
         for property in xml_node.getElementsByTagName('property'):
@@ -73,16 +87,31 @@ class ConfigParser(object):
                 id = property.attributes['ref'].nodeValue
                 print id
                 if id not in self.node_map[url]:
-                    if id not in self.ref_nodes:
-                        node = self.create_factory_node(id)
-                        self.ref_nodes[id] = node
+                    if id not in self.factory_nodes:
+                        factory = self.create_factory_node(id, url)
+                        skeleton = self.create_skeleton_node(id)
+                        self.factory_nodes[id] = factory
+                        self.skeleton_nodes[id] = skeleton
 
                     if id not in used_nodes:
                         print 'id', id
-                        head.appendChild(self.ref_nodes[id].cloneNode(True))
+                        head.appendChild(self.factory_nodes[id].cloneNode(True))
                         used_nodes.append(id)
 
-    def create_factory_node(self, id):
+    def create_skeleton_node(self, id):
+        child = self.d.createElement('bean')
+        child.setAttribute('id', id + '.skeleton')
+        child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxySkeleton')
+
+        child.appendChild(self.create_constructor_ref_arg('cold.proxyActorSystem'))
+        child.appendChild(self.create_constructor_ref_arg(id))
+
+        child.appendChild(self.create_constructor_arg(id))
+
+        return child
+
+
+    def create_factory_node(self, id, url):
         child = self.d.createElement('bean')
         child.setAttribute('id', id)
         child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxyStubFactory')
@@ -90,8 +119,20 @@ class ConfigParser(object):
 
         child.appendChild(self.create_constructor_arg(self.class_id[id]))
         child.appendChild(self.create_constructor_arg(id))
+        child.appendChild(self.create_constructor_ref_arg('cold.proxyActorSystem'))
+
+        (host, port) = url.split(":")
+        child.appendChild(self.create_constructor_arg(host))
+        child.appendChild(self.create_constructor_arg(port))
 
         return child
+
+    def create_constructor_ref_arg(self, value):
+        carg = self.d.createElement('constructor-arg')
+        ref = self.d.createElement('ref')
+        ref.setAttribute('bean', value)
+        carg.appendChild(ref)
+        return carg
 
     def create_constructor_arg(self, value):
         carg = self.d.createElement('constructor-arg')
@@ -101,12 +142,28 @@ class ConfigParser(object):
         carg.appendChild(val)
         return carg
 
+    def create_proxy_actor_system(self, url):
+        child = self.d.createElement('bean')
+        child.setAttribute('id', 'cold.proxyActorSystem')
+        child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxyActorSystem')
+
+        (host, port) = url.split(":")
+        child.appendChild(self.create_constructor_arg(host))
+        child.appendChild(self.create_constructor_arg(port))
+
+        return child
+
     def close_xml(self):
-        for file in self.new_xml.values():
+        for url in self.new_xml_content:
+            head = self.new_xml_content[url]
+            head.writexml(self.new_xml_files[url], '', '\t', '\n')
+
+        for file in self.new_xml_files.values():
             file.close()
 
     def parse(self):
         self.read_node_config()
         self.parse_xml()
+        self.add_skeletons()
         self.close_xml()
         return self.files_map
