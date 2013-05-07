@@ -4,22 +4,30 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 
+import akka.actor.ActorRef;
+
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 
 public class ProxyStubFactory {
 
-	public static Object createProxyStub(Class<?> klass, final String beanId) {
+	public static Object createProxyStub(Class<?> klass, final String beanId,
+			final ProxyActorSystem proxyActorSystem, final String remotePath) {
 
 		if (klass == null || beanId == null) {
 			throw new InvalidParameterException(
 					"Neither klass nor beanId can be null");
 		}
 
+		if (proxyActorSystem == null) {
+			throw new InvalidParameterException(
+					"proxyActorSystem cannot be null.");
+		}
+
 		ProxyFactory factory = new ProxyFactory();
 		factory.setSuperclass(klass);
-		
+
 		factory.setFilter(new MethodFilter() {
 
 			@Override
@@ -43,6 +51,12 @@ public class ProxyStubFactory {
 							"Cannot remotely invoke method with non-void return type.");
 				}
 
+				MethodInvocation methodInvocation = new MethodInvocation(
+						thisMethod.getClass(), beanId,
+						thisMethod.getParameterTypes(), args);
+
+				ActorRef remoteActor = proxyActorSystem.getActorSystem().actorFor(remotePath); 
+				remoteActor.tell(methodInvocation, null);
 				return null;
 			}
 		};
