@@ -16,11 +16,15 @@ class ConfigParser(object):
         self.location = ''
         self.skeleton_nodes = {}
         self.factory_nodes = {}
+        self.first_node = ''
 
     def read_node_config(self):
         config = open(self.node_config, mode='r')
 
         content = config.readlines()
+
+        [self.first_node, _ ] = content[0].split(';')
+
         for line in content:
             [url, beans] = line.split(';')
             beans = [b.strip() for b in beans.split(',')]
@@ -168,4 +172,4 @@ class ConfigParser(object):
         self.parse_xml()
         self.add_skeletons()
         self.close_xml()
-        return self.files_map
+        return self.first_node, self.files_map
