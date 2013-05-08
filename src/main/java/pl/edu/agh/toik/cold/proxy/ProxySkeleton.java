@@ -23,8 +23,8 @@ public class ProxySkeleton {
 	private String beanId;
 
 	@SuppressWarnings("serial")
-	public ProxySkeleton(Object targetObject,
-			ProxyActorSystem proxyActorSystem, String beanId) {
+	public ProxySkeleton(ProxyActorSystem proxyActorSystem,
+			Object targetObject, String beanId) {
 
 		if (targetObject == null || proxyActorSystem == null || beanId == null) {
 			throw new InvalidParameterException("No paramaters can be null.");
@@ -36,7 +36,7 @@ public class ProxySkeleton {
 
 		proxySkeletonActor = proxyActorSystem.getActorSystem().actorOf(
 				new Props(new UntypedActorFactory() {
-					
+
 					@Override
 					public Actor create() throws Exception {
 						return new ProxySkeletonActor(ProxySkeleton.this);
