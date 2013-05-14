@@ -25,6 +25,14 @@ public class IronThrone {
 		kingsHand.askSmallCouncil();
 		
 		spider.printLittleBirdsReport();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		otherSpider.printLittleBirdsReport();
 	}
 	
