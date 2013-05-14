@@ -2,10 +2,15 @@ package pl.edu.agh.toik.cold.example;
 
 public class Spider extends SmallCouncilMember {
 
-	StringBuilder littleBirdsReport = new StringBuilder();
+	private StringBuilder littleBirdsReport = new StringBuilder();
+	private Spider otherSpider = null;
 	
 	public void spy(String who, String message) {
 		littleBirdsReport.append(who + " : " + message + "\n");
+		
+		if (otherSpider != null) {
+			otherSpider.spy(who, message);
+		}
 	}
 	
 	public void printLittleBirdsReport() {
@@ -15,6 +20,15 @@ public class Spider extends SmallCouncilMember {
 	@Override
 	public void vote(String query) {
 	}
+
+	public Spider getOtherSpider() {
+		return otherSpider;
+	}
+
+	public void setOtherSpider(Spider otherSpider) {
+		this.otherSpider = otherSpider;
+	}
+	
 }
 
 

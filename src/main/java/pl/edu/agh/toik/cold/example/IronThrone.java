@@ -4,9 +4,15 @@ public class IronThrone {
 
 	private KingsHand kingsHand;
 	private Spider spider;
+	private Spider otherSpider = null;
 	
 	
 	public void playGame(boolean winOrDie) {
+		
+		if (otherSpider != null) {
+			spider.setOtherSpider(otherSpider);
+		}
+		
 		if(winOrDie) {
 			happyScenario();
 		} else {
@@ -19,6 +25,15 @@ public class IronThrone {
 		kingsHand.askSmallCouncil();
 		
 		spider.printLittleBirdsReport();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		otherSpider.printLittleBirdsReport();
 	}
 	
 	private void happyScenario() {
@@ -34,6 +49,10 @@ public class IronThrone {
 	
 	public void setSpider(Spider spider) {
 		this.spider = spider;
+	}
+
+	public void setOtherSpider(Spider otherSpider) {
+		this.otherSpider = otherSpider;
 	}
 	
 }
