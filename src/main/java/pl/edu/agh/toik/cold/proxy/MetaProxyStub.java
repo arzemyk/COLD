@@ -1,6 +1,10 @@
 package pl.edu.agh.toik.cold.proxy;
 
-public class MetaProxyStub {
+import java.io.Serializable;
+
+public class MetaProxyStub implements Serializable {
+
+	private static final long serialVersionUID = 475869829914682276L;
 
 	private Class<?> klass;
 	

@@ -1,5 +1,8 @@
 package pl.edu.agh.toik.cold.proxy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import akka.actor.ActorSystem;
 
 import com.typesafe.config.Config;
@@ -10,6 +13,8 @@ public class ProxyActorSystem {
 	private final String hostname;
 	private final int port;
 	private final ActorSystem actorSystem;
+	private final Map<Object, MetaProxyStub> metaStubsMap = new HashMap<>();
+	private final Map<Object, ProxySkeleton> skeletonsMap = new HashMap<>();
 
 	public ProxyActorSystem(String hostname, int port) {
 		this.hostname = hostname;
@@ -34,6 +39,30 @@ public class ProxyActorSystem {
 
 	public int getPort() {
 		return port;
+	}
+	
+	public boolean isProxyStub(Object object) {
+		return metaStubsMap.containsKey(object);
+	}
+	
+	public MetaProxyStub getMetaProxyStub(Object object) {		
+		return metaStubsMap.get(object);
+	}
+	
+	public void addMetaProxyStub(Object object, MetaProxyStub metaProxyStub) {
+		metaStubsMap.put(object, metaProxyStub);
+	}
+	
+	public boolean hasProxySkeleton(Object object) {
+		return skeletonsMap.containsKey(object);				
+	}
+	
+	public ProxySkeleton getProxySkeleton(Object object) {
+		return skeletonsMap.get(object);
+	}
+	
+	public void addSkeleton(Object object, ProxySkeleton proxySkeleton) {
+		skeletonsMap.put(object, proxySkeleton);
 	}
 
 }

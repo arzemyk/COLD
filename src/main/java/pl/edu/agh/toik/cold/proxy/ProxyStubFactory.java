@@ -1,14 +1,15 @@
 package pl.edu.agh.toik.cold.proxy;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
-
-import akka.actor.ActorRef;
+import java.util.UUID;
 
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+import akka.actor.ActorRef;
 
 public class ProxyStubFactory {
 
@@ -35,7 +36,7 @@ public class ProxyStubFactory {
 		MethodHandler handler = new MethodHandler() {
 			@Override
 			public Object invoke(Object self, Method thisMethod,
-					Method proceed, Object[] args) throws Throwable {
+					Method proceed, Object[] params) throws Throwable {
 
 				// System.out.println(String.format(
 				// "Handling %s for remote bean %s", thisMethod, beanId));
@@ -47,9 +48,46 @@ public class ProxyStubFactory {
 							"Cannot remotely invoke method with non-void return type.");
 				}
 
+				for (int i = 0; i < params.length; i++) {
+
+					Object param = params[i];
+					if (param instanceof Serializable) {
+						continue;
+					}
+
+					if (proxyActorSystem.isProxyStub(param)) {
+						MetaProxyStub metaProxyStub = proxyActorSystem
+								.getMetaProxyStub(param);
+						params[i] = metaProxyStub;
+						continue;
+					}
+
+					if (proxyActorSystem.hasProxySkeleton(param)) {
+						ProxySkeleton proxySkeleton = proxyActorSystem
+								.getProxySkeleton(param);
+
+						MetaProxyStub metaProxyStub = new MetaProxyStub(
+								param.getClass(), proxySkeleton.getBeanId(),
+								proxyActorSystem.getHostname(),
+								proxyActorSystem.getPort());
+
+						params[i] = metaProxyStub;
+						continue;
+					}
+
+					String randomBeanId = UUID.randomUUID().toString();
+					new ProxySkeleton(proxyActorSystem, param, randomBeanId);
+					MetaProxyStub metaProxyStub = new MetaProxyStub(
+							param.getClass(), randomBeanId,
+							proxyActorSystem.getHostname(),
+							proxyActorSystem.getPort());
+					params[i] = metaProxyStub;
+
+				}
+
 				MethodInvocation methodInvocation = new MethodInvocation(
 						thisMethod.getDeclaringClass(), thisMethod.getName(),
-						beanId, thisMethod.getParameterTypes(), args);
+						beanId, thisMethod.getParameterTypes(), params);
 
 				String remotePath = String.format(
 						"akka://ColdSystem@%s:%d/user/%s", remoteHost,
@@ -79,7 +117,18 @@ public class ProxyStubFactory {
 			e.printStackTrace();
 		}
 
+		MetaProxyStub metaProxyStub = new MetaProxyStub(klass, beanId,
+				remoteHost, remotePort);
+		proxyActorSystem.addMetaProxyStub(proxyStub, metaProxyStub);
+
 		return proxyStub;
 
+	}
+
+	public static Object createProxyStub(MetaProxyStub metaProxyStub,
+			ProxyActorSystem proxyActorSystem) {
+		return createProxyStub(metaProxyStub.getKlass(),
+				metaProxyStub.getBeanId(), proxyActorSystem,
+				metaProxyStub.getRemoteHost(), metaProxyStub.getRemotePort());
 	}
 }
