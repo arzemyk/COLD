@@ -7,6 +7,10 @@
 		<property name="name" value="Varys"></property>
 	</bean>
 	
+	<bean id="example.beans.qyburn" class="pl.edu.agh.toik.cold.example.Spider">
+		<property name="name" value="Qyburn"></property>
+	</bean>
+	
 	<bean id="example.beans.littlefinger"
 		class="pl.edu.agh.toik.cold.example.SmallCouncilMember">
 		<property value="Littlefinger" name="name"></property>
@@ -59,6 +63,7 @@
 	<bean id="example.beans.iron.throne" class="pl.edu.agh.toik.cold.example.IronThrone">
 		<property name="kingsHand" ref="example.beans.ned.stark"></property>
 		<property name="spider" ref="example.beans.varys"></property>
+		<property name="otherSpider" ref="example.beans.qyburn"></property>
 	</bean>
 	
 </beans>

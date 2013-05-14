@@ -7,6 +7,6 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="pl.edu.agh.toik.cold.example.Main"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="got-stub.xml"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="example/Spring-GoT-Example.xml"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cold"/>
 </launchConfiguration>

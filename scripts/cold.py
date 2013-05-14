@@ -6,11 +6,14 @@ from time import sleep
 import clean
 from config_parser import ConfigParser
 
+
 NODES_DIR = 'nodes'
 SKELETON_CLASS = 'pl.edu.agh.toik.cold.runner.SkeletonRunner'
-EXAMPLE_CLASS = 'pl.edu.agh.toik.cold.example.ExampleDemo'
+EXAMPLE_CLASS = 'pl.edu.agh.toik.cold.example.Main'
 COLD_CLASSPATH = '..' + os.sep + 'target' +os.sep + 'cold-0.1-SNAPSHOT.jar'
 DETACHED_PROCESS = 0x00000008
+
+
 
 def get_port(address):
     return address.split(':')[1]
@@ -23,19 +26,29 @@ def distribute(conf):
         os.mkdir(dir_name)
         shutil.move(file_name, dir_name + os.sep + file_name)
 
-def run_nodes(conf):
+def run_nodes(conf, main_node):
+
     for address in conf:
         port = get_port(address)
-        classpath = '-cp ' + COLD_CLASSPATH + ';' + NODES_DIR + os.sep + port 
+        classpath = '-cp ' + COLD_CLASSPATH + ';' + NODES_DIR + os.sep + port
         print(classpath)
-        proc = Popen('java ' + classpath + ' ' + SKELETON_CLASS + ' ' + conf[address])
+
+        command_template = 'java ' + classpath + ' %s ' + conf[address]
+
+        print address + " : " + main_node
+
+        if address == main_node:
+            main_command = command_template % EXAMPLE_CLASS
+            continue
+        command = command_template % SKELETON_CLASS
+        proc = Popen(command)
         sleep(5)
-        print proc.stderr
-        print proc.stdout
 
 
-    # classpath = '-cp ' + COLD_CLASSPATH + ';' + NODES_DIR + os.sep + '10004'
-    # proc = Popen('java ' + classpath + ' ' + EXAMPLE_CLASS  + ' ' + '10004')
+
+    main_proc = Popen(main_command)
+    sleep(5)
+
 
 
 
@@ -44,8 +57,11 @@ if __name__ == "__main__":
         print "Usage: python cold.py [node_config.cold] [original_config.xml]\n"
         exit()
 
+    clean.clean_paths()
+    clean.clean_jvms()
 
     parser = ConfigParser(sys.argv[1], sys.argv[2])
-    (first,configuration) = parser.parse()
+    (main_node,configuration) = parser.parse()
+    print main_node
     distribute(configuration)
-    run_nodes(configuration)
+    run_nodes(configuration, main_node.strip())

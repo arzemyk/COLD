@@ -1,8 +1,8 @@
 package pl.edu.agh.toik.cold.example;
 
-import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class ExampleDemo {
+public class Main {
 
 	public static void main(String[] args) {
 		
@@ -11,8 +11,8 @@ public class ExampleDemo {
 			System.exit(1);
 		}
 		
-		FileSystemXmlApplicationContext ctx = new FileSystemXmlApplicationContext(args[0]);
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(args[0]);
 		IronThrone throne = (IronThrone) ctx.getBean("example.beans.iron.throne");
-		throne.playGame(true);
+		throne.playGame(false);
 	}
 }
