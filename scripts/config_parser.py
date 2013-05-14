@@ -7,7 +7,7 @@ class ConfigParser(object):
         self.original_xml = original_xml
         self.node_config = node_config
         self.node_map = {}
-		self.url_map = {}
+        self.url_map = {}
         self.new_xml_files = {}
         self.new_xml_content = {}
         self.beans_map = {}
@@ -31,8 +31,8 @@ class ConfigParser(object):
             beans = [b.strip() for b in beans.split(',')]
             url = url.strip()
             self.node_map[url] = beans
-			for b in beans:
-				self.url_map[b] = url
+            for b in beans:
+                self.url_map[b] = url
             self.create_file_for_node(url)
 
         config.close()
