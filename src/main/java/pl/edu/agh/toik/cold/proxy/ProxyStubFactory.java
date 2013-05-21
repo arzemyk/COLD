@@ -4,11 +4,16 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
+import java.util.Map;
 import java.util.UUID;
 
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+
+import org.springframework.context.ApplicationContext;
+
+import pl.edu.agh.toik.cold.utils.SpringApplicationContext;
 import akka.actor.ActorRef;
 
 public class ProxyStubFactory {
@@ -79,16 +84,25 @@ public class ProxyStubFactory {
 					if (param instanceof Serializable) {
 						continue;
 					}	
-
-					// otherwise create skeleton to stay and MetaProxyStub to pass
-					String randomBeanId = UUID.randomUUID().toString();
-					new ProxySkeleton(proxyActorSystem, param, randomBeanId);
-					MetaProxyStub metaProxyStub = new MetaProxyStub(
-							param.getClass(), randomBeanId,
-							proxyActorSystem.getHostname(),
-							proxyActorSystem.getPort());
-					params[i] = metaProxyStub;
-
+					
+					
+					ApplicationContext ctx = SpringApplicationContext.getContext();
+					if (ctx != null) {
+						Map<String, ? extends Object> beans = ctx.getBeansOfType(param.getClass());
+						if (beans.containsValue(param)) {
+							// otherwise create skeleton to stay and MetaProxyStub to pass
+							String randomBeanId = UUID.randomUUID().toString();
+							new ProxySkeleton(proxyActorSystem, param, randomBeanId);
+							MetaProxyStub metaProxyStub = new MetaProxyStub(
+									param.getClass(), randomBeanId,
+									proxyActorSystem.getHostname(),
+									proxyActorSystem.getPort());
+							params[i] = metaProxyStub;
+						} else {
+							throw new UnsupportedOperationException(
+									"Object given as a parameter is neither stub, skeleton, serializable or bean: " + param);
+						}
+					}
 				}
 
 				MethodInvocation methodInvocation = new MethodInvocation(

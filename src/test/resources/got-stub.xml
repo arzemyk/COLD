@@ -3,6 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+	<bean id="cold.springApplicationContext" class="pl.edu.agh.toik.cold.utils.SpringApplicationContext"></bean>
+
 	<bean id="cold.proxyActorSystem" class="pl.edu.agh.toik.cold.proxy.ProxyActorSystem">
 		<constructor-arg>
 			<value>127.0.0.1</value>
