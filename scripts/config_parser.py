@@ -30,6 +30,11 @@ class ConfigParser(object):
             file_name = self.create_file_for_node(node.host)
             node.file = file_name
 
+        if self.config.main.standAlone:
+            file_name = self.create_file_for_node(self.config.main.host)
+            self.config.main.file = file_name
+            self.node_map[self.config.main.host] = []
+
     def create_file_for_node(self, url):
         number = len(self.new_xml_files)
         (_, original_name) = os.path.split(self.original_xml)
@@ -74,6 +79,14 @@ class ConfigParser(object):
                 print used_nodes
 
             self.new_xml_content[url] = head
+
+    def create_main_config(self):
+        if self.config.main.standAlone:
+            file_name = self.create_file_for_node(self.config.main.host)
+            self.config.main.file = file_name
+
+        #for bean in self.config.main.requiredBeans:
+
 
     def add_skeletons(self):
         for url in self.new_xml_content:
@@ -167,6 +180,7 @@ class ConfigParser(object):
     def parse(self):
         self.read_node_config()
         self.parse_xml()
+        #self.create_main_config()
         self.add_skeletons()
         self.close_xml()
         return self.config

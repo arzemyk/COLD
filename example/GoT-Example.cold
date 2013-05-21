@@ -1,7 +1,14 @@
 springConfiguration: '../example/Spring-GoT-Example.xml'
 classPath: '../example/example.jar'
-mainClass: 'pl.edu.agh.toik.cold.example.Main'
-mainNode: '127.0.0.1:10004'
+
+main:
+{
+    class: 'pl.edu.agh.toik.cold.example.Main'
+    host: '127.0.0.1:10005'
+    requiredBeans: []
+    standAlone: True
+}
+
 beansDistribution:
 [
     {
