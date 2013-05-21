@@ -3,7 +3,7 @@ package pl.edu.agh.toik.cold.example;
 public class WesterosCitizen {
 	
 	protected Spider spider;
-	
+	 
 	private String name;
 	
 	

@@ -18,11 +18,12 @@
 
 	<bean id="example.beans.varys.skeleton" class="pl.edu.agh.toik.cold.proxy.ProxySkeleton">
 		<constructor-arg>
-			<ref bean="example.beans.varys" />
-		</constructor-arg>
-		<constructor-arg>
 			<ref bean="cold.proxyActorSystem" />
 		</constructor-arg>
+		<constructor-arg>
+			<ref bean="example.beans.varys" />
+		</constructor-arg>
+		
 		<constructor-arg>
 			<value>example.beans.varys</value>
 		</constructor-arg>

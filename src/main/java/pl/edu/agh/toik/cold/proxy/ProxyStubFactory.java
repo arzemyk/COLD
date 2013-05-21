@@ -50,8 +50,8 @@ public class ProxyStubFactory {
 
 				for (int i = 0; i < params.length; i++) {
 
-					Object param = params[i];
-
+					Object param = params[i];			
+					
 					// given object is a stub - pass MetaProxyStub
 					if (proxyActorSystem.isProxyStub(param)) {
 						MetaProxyStub metaProxyStub = proxyActorSystem
@@ -60,8 +60,7 @@ public class ProxyStubFactory {
 						continue;
 					}
 
-					// given object is a skeleton - create and pass
-					// MetaProxyStub to connect
+					// given object is a skeleton - create and pass MetaProxyStub to connect
 					// to that skeleton
 					if (proxyActorSystem.hasProxySkeleton(param)) {
 						ProxySkeleton proxySkeleton = proxyActorSystem
@@ -75,16 +74,15 @@ public class ProxyStubFactory {
 						params[i] = metaProxyStub;
 						continue;
 					}
-
+					
 					// given object is serializable - just leave it
 					if (param instanceof Serializable) {
 						continue;
-					}
+					}	
 
-					// otherwise create skeleton to stay and MetaProxyStub to
-					// pass
+					// otherwise create skeleton to stay and MetaProxyStub to pass
 					String randomBeanId = UUID.randomUUID().toString();
-					new ProxySkeleton(param, proxyActorSystem, randomBeanId);
+					new ProxySkeleton(proxyActorSystem, param, randomBeanId);
 					MetaProxyStub metaProxyStub = new MetaProxyStub(
 							param.getClass(), randomBeanId,
 							proxyActorSystem.getHostname(),
