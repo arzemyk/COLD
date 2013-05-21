@@ -1,2 +1,16 @@
-127.0.0.1:2552 ; example.beans.iron.throne, example.beans.qyburn, example.beans.ned.stark, example.beans.jon.snow, example.beans.joffrey, example.beans.ser.ilyn, example.beans.small.council, example.beans.littlefinger
-127.0.0.1:2553 ; example.beans.varys
+springConfiguration: '../example/Spring-GoT-Example.xml'
+classPath: 'jakis/classpath'
+mainClass: 'pl.edu.agh.toik.cold.example.IronThrone'
+mainNode: 'local'
+beansDistribution:
+[
+    {
+        host : '127.0.0.1:2552',
+        beans:['example.beans.iron.throne', 'example.beans.qyburn', 'example.beans.ned.stark', 'example.beans.jon.snow',
+               'example.beans.joffrey', 'example.beans.ser.ilyn', 'example.beans.small.council', 'example.beans.littlefinger']
+    },
+    {
+        host: '127.0.0.1:2553',
+        beans: ['example.beans.varys']
+    }
+]
