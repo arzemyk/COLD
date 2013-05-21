@@ -9,9 +9,6 @@ from config_parser import ConfigParser
 
 NODES_DIR = 'nodes'
 SKELETON_CLASS = 'pl.edu.agh.toik.cold.runner.SkeletonRunner'
-EXAMPLE_CLASS = 'pl.edu.agh.toik.cold.example.Main'
-COLD_CLASSPATH = '..' + os.sep + 'target' +os.sep + 'cold-0.1-SNAPSHOT.jar'
-DETACHED_PROCESS = 0x00000008
 
 
 
@@ -20,25 +17,24 @@ def get_port(address):
 
 def distribute(conf):
     os.mkdir(NODES_DIR)
-    for address in conf:
-        dir_name = NODES_DIR + os.sep + get_port(address)
-        file_name = conf[address]
+    for node in conf.beansDistribution:
+        dir_name = NODES_DIR + os.sep + get_port(node.host)
+        springConfFile = node.file
         os.mkdir(dir_name)
-        shutil.move(file_name, dir_name + os.sep + file_name)
+        shutil.move(springConfFile, dir_name + os.sep + springConfFile)
 
-def run_nodes(conf, main_node):
+def run_nodes(conf):
 
-    for address in conf:
+    for node in conf.beansDistribution:
+        address = node.host
         port = get_port(address)
-        classpath = '-cp ' + COLD_CLASSPATH + ';' + NODES_DIR + os.sep + port
+        classpath = '-cp ' + conf.classPath + ';' + conf.coldLocation + ';' + NODES_DIR + os.sep + port
         print(classpath)
 
-        command_template = 'java ' + classpath + ' %s ' + conf[address]
+        command_template = 'java ' + classpath + ' %s ' + node.file
 
-        print address + " : " + main_node
-
-        if address == main_node:
-            main_command = command_template % EXAMPLE_CLASS
+        if address == conf.mainNode:
+            main_command = command_template % conf.mainClass
             continue
         command = command_template % SKELETON_CLASS
         proc = Popen(command)
@@ -47,21 +43,20 @@ def run_nodes(conf, main_node):
 
 
     main_proc = Popen(main_command)
-    sleep(5)
-
+    sleep(10)
 
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print "Usage: python cold.py [node_config.cold] [original_config.xml]\n"
+    if len(sys.argv) != 2:
+        print "Usage: python cold.py [node_config.cold]\n"
         exit()
 
     clean.clean_paths()
     clean.clean_jvms()
 
-    parser = ConfigParser(sys.argv[1], sys.argv[2])
-    (main_node,configuration) = parser.parse()
-    print main_node
-    distribute(configuration)
-    run_nodes(configuration, main_node.strip())
+    parser = ConfigParser(sys.argv[1])
+    conf = parser.parse()
+
+    distribute(conf)
+    run_nodes(conf)
