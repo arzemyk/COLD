@@ -27,7 +27,8 @@ class ConfigParser(object):
             self.node_map[node.host] = node.beans
             for b in node.beans:
                 self.url_map[b] = node.host
-            self.create_file_for_node(node.host)
+            file_name = self.create_file_for_node(node.host)
+            node.file = file_name
 
     def create_file_for_node(self, url):
         number = len(self.new_xml_files)
@@ -37,6 +38,7 @@ class ConfigParser(object):
         self.new_xml_files[url] = open(self.location+new_name, mode='w')
         self.new_xml_files[url].write('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.new_xml_files[url].write('<!--' + url + '-->\n')
+        return new_name
 
     def parse_xml(self):
         xml = minidom.parse(self.original_xml)
@@ -167,4 +169,4 @@ class ConfigParser(object):
         self.parse_xml()
         self.add_skeletons()
         self.close_xml()
-        return self.config, self.files_map
+        return self.config
