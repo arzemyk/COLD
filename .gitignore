@@ -18,3 +18,4 @@
 
 
 /scripts/*.pyc
+/scripts/config/*.pyc

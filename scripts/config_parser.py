@@ -1,10 +1,10 @@
 from xml.dom import minidom
 import os
+from config.config import Config
 
 class ConfigParser(object):
 
-    def __init__(self, node_config, original_xml):
-        self.original_xml = original_xml
+    def __init__(self, node_config):
         self.node_config = node_config
         self.node_map = {}
         self.url_map = {}
@@ -20,22 +20,14 @@ class ConfigParser(object):
         self.first_node = ''
 
     def read_node_config(self):
-        config = open(self.node_config, mode='r')
-
-        content = config.readlines()
-
-        [self.first_node, _ ] = content[0].split(';')
-
-        for line in content:
-            [url, beans] = line.split(';')
-            beans = [b.strip() for b in beans.split(',')]
-            url = url.strip()
-            self.node_map[url] = beans
-            for b in beans:
-                self.url_map[b] = url
-            self.create_file_for_node(url)
-
-        config.close()
+        f = file(self.node_config)
+        self.config = Config(f)
+        self.original_xml = self.config.springConfiguration
+        for node in self.config.beansDistribution:
+            self.node_map[node.host] = node.beans
+            for b in node.beans:
+                self.url_map[b] = node.host
+            self.create_file_for_node(node.host)
 
     def create_file_for_node(self, url):
         number = len(self.new_xml_files)
@@ -112,7 +104,6 @@ class ConfigParser(object):
 
         child.appendChild(self.create_constructor_ref_arg('cold.proxyActorSystem'))
         child.appendChild(self.create_constructor_ref_arg(id))
-
         child.appendChild(self.create_constructor_arg(id))
 
         return child
@@ -176,4 +167,4 @@ class ConfigParser(object):
         self.parse_xml()
         self.add_skeletons()
         self.close_xml()
-        return self.first_node, self.files_map
+        return self.config, self.files_map
