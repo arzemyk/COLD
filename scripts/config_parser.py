@@ -78,15 +78,10 @@ class ConfigParser(object):
                 head.appendChild(new_node)
                 print used_nodes
 
+            if self.config.main.host == url:
+                self.create_main_config(used_nodes, head)
+
             self.new_xml_content[url] = head
-
-    def create_main_config(self):
-        if self.config.main.standAlone:
-            file_name = self.create_file_for_node(self.config.main.host)
-            self.config.main.file = file_name
-
-        #for bean in self.config.main.requiredBeans:
-
 
     def add_skeletons(self):
         for url in self.new_xml_content:
@@ -94,6 +89,18 @@ class ConfigParser(object):
             for id in self.node_map[url]:
                 if id in self.skeleton_nodes:
                     head.appendChild(self.skeleton_nodes[id])
+
+    def create_main_config(self, used_nodes, head):
+        for id in self.config.main.requiredBeans:
+            if id not in self.factory_nodes:
+                factory = self.create_factory_node(id, self.url_map[id])
+                skeleton = self.create_skeleton_node(id)
+                self.factory_nodes[id] = factory
+                self.skeleton_nodes[id] = skeleton
+
+            if id not in used_nodes:
+                head.appendChild(self.factory_nodes[id].cloneNode(True))
+                used_nodes.append(id)
 
     def check_references(self, url, xml_node, used_nodes, head):
         for property in xml_node.getElementsByTagName('property'):
@@ -180,7 +187,6 @@ class ConfigParser(object):
     def parse(self):
         self.read_node_config()
         self.parse_xml()
-        #self.create_main_config()
         self.add_skeletons()
         self.close_xml()
         return self.config
