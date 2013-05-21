@@ -1,7 +1,7 @@
 springConfiguration: '../example/Spring-GoT-Example.xml'
-classPath: 'jakis/classpath'
-mainClass: 'pl.edu.agh.toik.cold.example.IronThrone'
-mainNode: 'local'
+classPath: '../example/example.jar'
+mainClass: 'pl.edu.agh.toik.cold.example.Main'
+mainNode: '127.0.0.1:10004'
 beansDistribution:
 [
     {
