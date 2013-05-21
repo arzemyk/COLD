@@ -23,10 +23,13 @@ class ConfigParser(object):
         f = file(self.node_config)
         self.config = Config(f)
         self.original_xml = self.config.springConfiguration
+
         for node in self.config.beansDistribution:
             self.node_map[node.host] = node.beans
+
             for b in node.beans:
                 self.url_map[b] = node.host
+
             file_name = self.create_file_for_node(node.host)
             node.file = file_name
 
@@ -43,6 +46,7 @@ class ConfigParser(object):
         self.new_xml_files[url] = open(self.location+new_name, mode='w')
         self.new_xml_files[url].write('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.new_xml_files[url].write('<!--' + url + '-->\n')
+
         return new_name
 
     def parse_xml(self):
@@ -62,6 +66,10 @@ class ConfigParser(object):
             print url
 
             head = xml_head[0].cloneNode(False)
+
+            application_context = self.create_application_context()
+
+            head.appendChild(application_context)
 
             proxy_actor_system = self.create_proxy_actor_system(url)
 
@@ -170,6 +178,13 @@ class ConfigParser(object):
         (host, port) = url.split(":")
         child.appendChild(self.create_constructor_arg(host))
         child.appendChild(self.create_constructor_arg(port))
+
+        return child
+
+    def create_application_context(self):
+        child = self.d.createElement('bean')
+        child.setAttribute('id', 'cold.springApplicationContext')
+        child.setAttribute('class', 'pl.edu.agh.toik.cold.utils.SpringApplicationContext')
 
         return child
 
