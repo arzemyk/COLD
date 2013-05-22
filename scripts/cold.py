@@ -15,13 +15,20 @@ SKELETON_CLASS = 'pl.edu.agh.toik.cold.runner.SkeletonRunner'
 def get_port(address):
     return address.split(':')[1]
 
+
+def create_node(node):
+    dir_name = NODES_DIR + os.sep + get_port(node.host)
+    springConfFile = node.file
+    os.mkdir(dir_name)
+    shutil.move(springConfFile, dir_name + os.sep + springConfFile)
+
 def distribute(conf):
     os.mkdir(NODES_DIR)
     for node in conf.beansDistribution:
-        dir_name = NODES_DIR + os.sep + get_port(node.host)
-        springConfFile = node.file
-        os.mkdir(dir_name)
-        shutil.move(springConfFile, dir_name + os.sep + springConfFile)
+        create_node(node)
+
+    if conf.main.standAlone:
+        create_node(conf.main)
 
 def run_nodes(conf):
 
@@ -33,14 +40,16 @@ def run_nodes(conf):
 
         command_template = 'java ' + classpath + ' %s ' + node.file
 
-        if address == conf.mainNode:
-            main_command = command_template % conf.mainClass
+        if address == conf.main.host:
+            main_command = command_template % conf.main.className
             continue
         command = command_template % SKELETON_CLASS
         proc = Popen(command)
         sleep(5)
 
-
+    if conf.main.standAlone:
+        classpath = '-cp ' + conf.classPath + ';' + conf.coldLocation + ';' + NODES_DIR + os.sep + get_port(conf.main.host)
+        main_command = 'java ' + classpath + ' ' + conf.main.className + ' ' + conf.main.file
 
     main_proc = Popen(main_command)
     sleep(10)
