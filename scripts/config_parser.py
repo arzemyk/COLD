@@ -62,6 +62,8 @@ class ConfigParser(object):
             self.class_id[id] = clazz
             print 'bean', bean.attributes['id'].value
 
+        self.create_stubs_and_skeletons()
+
         for url in self.new_xml_files:
             print url
 
@@ -91,6 +93,13 @@ class ConfigParser(object):
 
             self.new_xml_content[url] = head
 
+    def create_stubs_and_skeletons(self):
+        for id in self.url_map:
+            factory = self.create_factory_node(id, self.url_map[id])
+            skeleton = self.create_skeleton_node(id)
+            self.factory_nodes[id] = factory
+            self.skeleton_nodes[id] = skeleton
+
     def add_skeletons(self):
         for url in self.new_xml_content:
             head = self.new_xml_content[url]
@@ -101,8 +110,7 @@ class ConfigParser(object):
     def create_main_config(self, used_nodes, head):
         for id in self.url_map:
             if id not in used_nodes and id not in self.node_map[self.config.main.host]:
-                factory = self.create_factory_node(id, self.url_map[id], True)
-                head.appendChild(factory.cloneNode(True))
+                head.appendChild(self.factory_nodes[id].cloneNode(True))
                 used_nodes.append(id)
 
     def check_references(self, url, xml_node, used_nodes, head):
@@ -111,12 +119,6 @@ class ConfigParser(object):
                 id = property.attributes['ref'].nodeValue
                 print id
                 if id not in self.node_map[url]:
-                    if id not in self.factory_nodes:
-                        factory = self.create_factory_node(id, self.url_map[id])
-                        skeleton = self.create_skeleton_node(id)
-                        self.factory_nodes[id] = factory
-                        self.skeleton_nodes[id] = skeleton
-
                     if id not in used_nodes:
                         print 'id', id
                         head.appendChild(self.factory_nodes[id].cloneNode(True))
@@ -126,6 +128,7 @@ class ConfigParser(object):
         child = self.d.createElement('bean')
         child.setAttribute('id', id + '.skeleton')
         child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxySkeleton')
+        child.setAttribute('lazy-init', 'true')
 
         child.appendChild(self.create_constructor_ref_arg('cold.proxyActorSystem'))
         child.appendChild(self.create_constructor_ref_arg(id))
@@ -134,14 +137,12 @@ class ConfigParser(object):
         return child
 
 
-    def create_factory_node(self, id, url, lazy_init = False):
+    def create_factory_node(self, id, url):
         child = self.d.createElement('bean')
         child.setAttribute('id', id)
         child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxyStubFactory')
         child.setAttribute('factory-method', 'createProxyStub')
-
-        if lazy_init:
-            child.setAttribute('lazy-init', 'true')
+        child.setAttribute('lazy-init', 'true')
 
         child.appendChild(self.create_constructor_arg(self.class_id[id]))
         child.appendChild(self.create_constructor_arg(id))
