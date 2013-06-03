@@ -5,7 +5,6 @@ main:
 {
     class: 'pl.edu.agh.toik.cold.example.Main'
     host: '127.0.0.1:10004'
-    requiredBeans: []
     standAlone: False
 }
 
