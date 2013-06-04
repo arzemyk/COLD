@@ -15,6 +15,10 @@ public class King extends WesterosCitizen {
 	public King(boolean isPsychopathic) {
 		this.isPsychopathic = isPsychopathic;
 	}
+	
+	public King() {
+		this(true);
+	}
 
 	public void judge(String information) {
 		if(isPsychopathic) {
