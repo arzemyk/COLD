@@ -3,10 +3,12 @@ package pl.edu.agh.toik.cold.proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
+import akka.actor.UntypedActorFactory;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -23,16 +25,22 @@ public class ProxyActorSystem {
 		this.hostname = hostname;
 		this.port = port;
 
-		Config config = ConfigFactory.parseString(
-				String.format("akka.remote.netty.hostname=\"%s\"\n"
-						+ "akka.remote.netty.port=\"%d\"\n"
-						+ "akka.actor.provider = \"akka.remote.RemoteActorRefProvider\"\n",
-						hostname, port)).withFallback(ConfigFactory.load());
+		Config config = ConfigFactory
+				.parseString(
+						String.format(
+								"akka.remote.netty.hostname=\"%s\"\n"
+										+ "akka.remote.netty.port=\"%d\"\n"
+										+ "akka.actor.provider = \"akka.remote.RemoteActorRefProvider\"\n",
+								hostname, port)).withFallback(
+						ConfigFactory.load());
 
 		actorSystem = ActorSystem.create("ColdSystem", config);
-		
-		ActorRef deadLetterActor = actorSystem.actorOf(new Props(DeadLetterActor.class));
+
+		ActorRef deadLetterActor = actorSystem.actorOf(new Props(
+				DeadLetterActor.class));
 		actorSystem.eventStream().subscribe(deadLetterActor, DeadLetter.class);
+
+		createKillerActor();
 	}
 
 	public ActorSystem getActorSystem() {
@@ -46,29 +54,33 @@ public class ProxyActorSystem {
 	public int getPort() {
 		return port;
 	}
-	
+
 	public boolean isProxyStub(Object object) {
 		return metaStubsMap.containsKey(object);
 	}
-	
-	public MetaProxyStub getMetaProxyStub(Object object) {		
+
+	public MetaProxyStub getMetaProxyStub(Object object) {
 		return metaStubsMap.get(object);
 	}
-	
+
 	public void addMetaProxyStub(Object object, MetaProxyStub metaProxyStub) {
 		metaStubsMap.put(object, metaProxyStub);
 	}
-	
+
 	public boolean hasProxySkeleton(Object object) {
-		return skeletonsMap.containsKey(object);				
+		return skeletonsMap.containsKey(object);
 	}
-	
+
 	public ProxySkeleton getProxySkeleton(Object object) {
 		return skeletonsMap.get(object);
 	}
-	
+
 	public void addSkeleton(Object object, ProxySkeleton proxySkeleton) {
 		skeletonsMap.put(object, proxySkeleton);
+	}
+
+	private void createKillerActor() {
+		actorSystem.actorOf(new Props(ProxyActorKiller.class), ProxyActorKiller.KILLER_ID);
 	}
 
 }
