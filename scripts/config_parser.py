@@ -1,34 +1,35 @@
-from xml.dom import minidom
 import os
+from validator import Validator
+from xml.dom import minidom
 from config.config import Config
+from xml_node_generator import XMLNodeGenerator
 
 class ConfigParser(object):
 
     def __init__(self, node_config):
         self.node_config = node_config
-        self.node_map = {}
-        self.url_map = {}
+        self.url_to_bean_map = {}
+        self.bean_to_url_map = {}
         self.new_xml_files = {}
         self.new_xml_content = {}
-        self.beans_map = {}
-        self.class_id = {}
-        self.files_map = {}
-        self.d = minidom.Document()
+        self.xml_beans_node_map = {}
+        self.url_to_files_map = {}
         self.location = ''
         self.skeleton_nodes = {}
         self.factory_nodes = {}
-        self.first_node = ''
 
+    # reads config from .cold file
     def read_node_config(self):
         f = file(self.node_config)
         self.config = Config(f)
-        self.original_xml = self.config.springConfiguration
+
+        Validator.validate(self.config)
 
         for node in self.config.beansDistribution:
-            self.node_map[node.host] = node.beans
+            self.url_to_bean_map[node.host] = node.beans
 
             for b in node.beans:
-                self.url_map[b] = node.host
+                self.bean_to_url_map[b] = node.host
 
             file_name = self.create_file_for_node(node.host)
             node.file = file_name
@@ -36,50 +37,89 @@ class ConfigParser(object):
         if self.config.main.standAlone:
             file_name = self.create_file_for_node(self.config.main.host)
             self.config.main.file = file_name
-            self.node_map[self.config.main.host] = []
+            self.url_to_bean_map[self.config.main.host] = []
 
+    # creates new file for given url
     def create_file_for_node(self, url):
         number = len(self.new_xml_files)
-        (_, original_name) = os.path.split(self.original_xml)
+        (_, original_name) = os.path.split(self.config.springConfiguration)
         new_name = original_name[:-4] + str(number) + original_name[-4:]
-        self.files_map[url] = new_name
+        self.url_to_files_map[url] = new_name
         self.new_xml_files[url] = open(self.location+new_name, mode='w')
         self.new_xml_files[url].write('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.new_xml_files[url].write('<!--' + url + '-->\n')
 
         return new_name
 
+    # creates stubs and skeletons for all beans
+    def create_stubs_and_skeletons(self):
+        for id in self.bean_to_url_map:
+            factory = self.xml_node_generator.create_factory_node(id, self.bean_to_url_map[id])
+            skeleton = self.xml_node_generator.create_skeleton_node(id)
+            self.factory_nodes[id] = factory
+            self.skeleton_nodes[id] = skeleton
+
+    # preprocesses beans to extract bean ids and class names
+    def preprocess(self, beans):
+        class_id = {}
+        for bean in beans:
+            id = bean.attributes['id'].value
+            clazz = bean.attributes['class'].value
+            self.xml_beans_node_map[id] = bean
+            class_id[id] = clazz
+            print 'bean', bean.attributes['id'].value
+
+        self.xml_node_generator = XMLNodeGenerator(class_id)
+
+        self.create_stubs_and_skeletons()
+
+    # creates application context and proxy actor system nodes
+    def init_file(self, head, url):
+        application_context = self.xml_node_generator.create_application_context()
+        proxy_actor_system = self.xml_node_generator.create_proxy_actor_system(url)
+
+        head.appendChild(application_context)
+        head.appendChild(proxy_actor_system)
+
+    # adds stubs to xml for main node
+    def create_main_config(self, used_nodes, head):
+        for id in self.bean_to_url_map:
+            if id not in used_nodes and id not in self.url_to_bean_map[self.config.main.host]:
+                head.appendChild(self.factory_nodes[id].cloneNode(True))
+                used_nodes.append(id)
+
+    # checks references for given bean and adds stub factory to node if necessary
+    def check_references(self, url, xml_node, used_nodes, head):
+        for property in xml_node.getElementsByTagName('property'):
+            if property.attributes.has_key('ref'):
+                id = property.attributes['ref'].nodeValue
+                print id
+                if id not in self.url_to_bean_map[url]:
+                    if id not in used_nodes:
+                        print 'id', id
+                        head.appendChild(self.factory_nodes[id].cloneNode(True))
+                        used_nodes.append(id)
+
+    # parses xml configuration
     def parse_xml(self):
-        xml = minidom.parse(self.original_xml)
+        xml = minidom.parse(self.config.springConfiguration)
         beans = xml.getElementsByTagName('bean')
         xml_head = xml.getElementsByTagName('beans')
         xml_head[0].childNodes = []
 
-        for bean in beans:
-            id = bean.attributes['id'].value
-            clazz = bean.attributes['class'].value
-            self.beans_map[id] = bean
-            self.class_id[id] = clazz
-            print 'bean', bean.attributes['id'].value
+        self.preprocess(beans)
 
         for url in self.new_xml_files:
             print url
 
             head = xml_head[0].cloneNode(False)
 
-            application_context = self.create_application_context()
-
-            head.appendChild(application_context)
-
-            proxy_actor_system = self.create_proxy_actor_system(url)
-
-            head.appendChild(proxy_actor_system)
+            self.init_file(head, url)
 
             used_nodes = []
-
-            for node in self.node_map[url]:
+            for node in self.url_to_bean_map[url]:
                 print node
-                xml_node = self.beans_map[node]
+                xml_node = self.xml_beans_node_map[node]
                 print xml_node
                 new_node = xml_node.cloneNode(True)
                 self.check_references(url, new_node, used_nodes, head)
@@ -94,99 +134,9 @@ class ConfigParser(object):
     def add_skeletons(self):
         for url in self.new_xml_content:
             head = self.new_xml_content[url]
-            for id in self.node_map[url]:
+            for id in self.url_to_bean_map[url]:
                 if id in self.skeleton_nodes:
                     head.appendChild(self.skeleton_nodes[id])
-
-    def create_main_config(self, used_nodes, head):
-        for id in self.config.main.requiredBeans:
-            if id not in self.factory_nodes:
-                factory = self.create_factory_node(id, self.url_map[id])
-                skeleton = self.create_skeleton_node(id)
-                self.factory_nodes[id] = factory
-                self.skeleton_nodes[id] = skeleton
-
-            if id not in used_nodes:
-                head.appendChild(self.factory_nodes[id].cloneNode(True))
-                used_nodes.append(id)
-
-    def check_references(self, url, xml_node, used_nodes, head):
-        for property in xml_node.getElementsByTagName('property'):
-            if property.attributes.has_key('ref'):
-                id = property.attributes['ref'].nodeValue
-                print id
-                if id not in self.node_map[url]:
-                    if id not in self.factory_nodes:
-                        factory = self.create_factory_node(id, self.url_map[id])
-                        skeleton = self.create_skeleton_node(id)
-                        self.factory_nodes[id] = factory
-                        self.skeleton_nodes[id] = skeleton
-
-                    if id not in used_nodes:
-                        print 'id', id
-                        head.appendChild(self.factory_nodes[id].cloneNode(True))
-                        used_nodes.append(id)
-
-    def create_skeleton_node(self, id):
-        child = self.d.createElement('bean')
-        child.setAttribute('id', id + '.skeleton')
-        child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxySkeleton')
-
-        child.appendChild(self.create_constructor_ref_arg('cold.proxyActorSystem'))
-        child.appendChild(self.create_constructor_ref_arg(id))
-        child.appendChild(self.create_constructor_arg(id))
-
-        return child
-
-
-    def create_factory_node(self, id, url):
-        child = self.d.createElement('bean')
-        child.setAttribute('id', id)
-        child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxyStubFactory')
-        child.setAttribute('factory-method', 'createProxyStub')
-
-        child.appendChild(self.create_constructor_arg(self.class_id[id]))
-        child.appendChild(self.create_constructor_arg(id))
-        child.appendChild(self.create_constructor_ref_arg('cold.proxyActorSystem'))
-
-        (host, port) = url.split(":")
-        child.appendChild(self.create_constructor_arg(host))
-        child.appendChild(self.create_constructor_arg(port))
-
-        return child
-
-    def create_constructor_ref_arg(self, value):
-        carg = self.d.createElement('constructor-arg')
-        ref = self.d.createElement('ref')
-        ref.setAttribute('bean', value)
-        carg.appendChild(ref)
-        return carg
-
-    def create_constructor_arg(self, value):
-        carg = self.d.createElement('constructor-arg')
-        val = self.d.createElement('value')
-        text = self.d.createTextNode(value)
-        val.appendChild(text)
-        carg.appendChild(val)
-        return carg
-
-    def create_proxy_actor_system(self, url):
-        child = self.d.createElement('bean')
-        child.setAttribute('id', 'cold.proxyActorSystem')
-        child.setAttribute('class', 'pl.edu.agh.toik.cold.proxy.ProxyActorSystem')
-
-        (host, port) = url.split(":")
-        child.appendChild(self.create_constructor_arg(host))
-        child.appendChild(self.create_constructor_arg(port))
-
-        return child
-
-    def create_application_context(self):
-        child = self.d.createElement('bean')
-        child.setAttribute('id', 'cold.springApplicationContext')
-        child.setAttribute('class', 'pl.edu.agh.toik.cold.utils.SpringApplicationContext')
-
-        return child
 
     def close_xml(self):
         for url in self.new_xml_content:

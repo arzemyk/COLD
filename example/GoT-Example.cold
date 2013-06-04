@@ -3,9 +3,8 @@ classPath: '../example/example.jar'
 
 main:
 {
-    class: 'pl.edu.agh.toik.cold.example.Main'
+    className: 'pl.edu.agh.toik.cold.example.Main'
     host: '127.0.0.1:10004'
-    requiredBeans: []
     standAlone: False
 }
 
