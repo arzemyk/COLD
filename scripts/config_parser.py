@@ -1,5 +1,6 @@
-from xml.dom import minidom
 import os
+from validator import Validator
+from xml.dom import minidom
 from config.config import Config
 from xml_node_generator import XMLNodeGenerator
 
@@ -21,6 +22,8 @@ class ConfigParser(object):
     def read_node_config(self):
         f = file(self.node_config)
         self.config = Config(f)
+
+        Validator.validate(self.config)
 
         for node in self.config.beansDistribution:
             self.url_to_bean_map[node.host] = node.beans
