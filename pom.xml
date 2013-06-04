@@ -17,6 +17,7 @@
 		<org.springframework.version>3.1.1.RELEASE</org.springframework.version>
 		<javassist.version>3.12.1.GA</javassist.version>
 		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+		<log4j.version>1.2.17</log4j.version>
 
 	</properties>
 
@@ -52,6 +53,7 @@
 					<downloadJavadocs>true</downloadJavadocs>
 				</configuration>
 			</plugin>
+			
 		</plugins>
 	</build>
 
@@ -89,7 +91,11 @@
 			<version>${javassist.version}</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 
 	</dependencies>
 
