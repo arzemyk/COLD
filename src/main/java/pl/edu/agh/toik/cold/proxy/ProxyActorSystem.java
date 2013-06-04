@@ -3,7 +3,10 @@ package pl.edu.agh.toik.cold.proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.DeadLetter;
+import akka.actor.Props;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -27,6 +30,9 @@ public class ProxyActorSystem {
 						hostname, port)).withFallback(ConfigFactory.load());
 
 		actorSystem = ActorSystem.create("ColdSystem", config);
+		
+		ActorRef deadLetterActor = actorSystem.actorOf(new Props(DeadLetterActor.class));
+		actorSystem.eventStream().subscribe(deadLetterActor, DeadLetter.class);
 	}
 
 	public ActorSystem getActorSystem() {

@@ -42,7 +42,7 @@ public class ProxySkeleton {
 						return new ProxySkeletonActor(ProxySkeleton.this);
 					}
 				}), beanId);
-		
+
 		proxyActorSystem.addSkeleton(targetObject, this);
 	}
 
@@ -53,7 +53,6 @@ public class ProxySkeleton {
 			throw new RuntimeException(
 					"MethodInvocation's target class doesn't match skeleton's target class.");
 		}
-		
 
 		Method method;
 		try {
@@ -62,17 +61,18 @@ public class ProxySkeleton {
 					methodInvocation.getParametersTypes());
 
 			Object[] params = methodInvocation.getParametersValues();
-			
+
 			for (int i = 0; i < params.length; i++) {
 				Object param = params[i];
 				if (param instanceof MetaProxyStub) {
-					MetaProxyStub metaProxyStub = (MetaProxyStub)param;
-					
-					Object proxyStub = ProxyStubFactory.createProxyStub(metaProxyStub, proxyActorSystem);
+					MetaProxyStub metaProxyStub = (MetaProxyStub) param;
+
+					Object proxyStub = ProxyStubFactory.createProxyStub(
+							metaProxyStub, proxyActorSystem);
 					params[i] = proxyStub;
 				}
 			}
-			
+
 			method.invoke(targetObject, methodInvocation.getParametersValues());
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
@@ -91,7 +91,9 @@ public class ProxySkeleton {
 	public String getBeanId() {
 		return beanId;
 	}
-	
-	
+
+	public ActorRef getProxySkeletonActor() {
+		return proxySkeletonActor;
+	}
 
 }

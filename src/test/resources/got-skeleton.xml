@@ -18,7 +18,7 @@
 		<property name="name" value="Varys"></property>
 	</bean>
 
-	<bean id="example.beans.varys.skeleton" class="pl.edu.agh.toik.cold.proxy.ProxySkeleton">
+	<bean id="example.beans.varys.skeleton" class="pl.edu.agh.toik.cold.proxy.ProxySkeleton" lazy-init = "true">
 		<constructor-arg>
 			<ref bean="cold.proxyActorSystem" />
 		</constructor-arg>
