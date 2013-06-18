@@ -51,11 +51,11 @@ class ConfigParser(object):
         for node in self.config.beansDistribution:
             self.url_to_bean_map[node.host] = node.beans
 
-        for b in node.beans:
-            self.bean_to_url_map[b] = node.host
+            for b in node.beans:
+                self.bean_to_url_map[b] = node.host
 
-        file_name = self.create_file_for_node(node.host)
-        node.file = file_name
+            file_name = self.create_file_for_node(node.host)
+            node.file = file_name
 
         if self.config.main.standAlone:
             file_name = self.create_file_for_node(self.config.main.host)
