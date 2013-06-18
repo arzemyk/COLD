@@ -24,20 +24,7 @@ class ConfigParser(object):
         self.config = Config(f)
 
         Validator.validate(self.config)
-
-        for node in self.config.beansDistribution:
-            self.url_to_bean_map[node.host] = node.beans
-
-            for b in node.beans:
-                self.bean_to_url_map[b] = node.host
-
-            file_name = self.create_file_for_node(node.host)
-            node.file = file_name
-
-        if self.config.main.standAlone:
-            file_name = self.create_file_for_node(self.config.main.host)
-            self.config.main.file = file_name
-            self.url_to_bean_map[self.config.main.host] = []
+        return self.config
 
     # creates new file for given url
     def create_file_for_node(self, url):
@@ -61,6 +48,20 @@ class ConfigParser(object):
 
     # preprocesses beans to extract bean ids and class names
     def preprocess(self, beans):
+        for node in self.config.beansDistribution:
+            self.url_to_bean_map[node.host] = node.beans
+
+        for b in node.beans:
+            self.bean_to_url_map[b] = node.host
+
+        file_name = self.create_file_for_node(node.host)
+        node.file = file_name
+
+        if self.config.main.standAlone:
+            file_name = self.create_file_for_node(self.config.main.host)
+            self.config.main.file = file_name
+            self.url_to_bean_map[self.config.main.host] = []
+
         class_id = {}
         for bean in beans:
             id = bean.attributes['id'].value
