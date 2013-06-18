@@ -5,6 +5,7 @@ import sys
 from time import sleep
 import cold
 from config_parser import ConfigParser
+import exception
 
 KILLER_CLASS = 'pl.edu.agh.toik.cold.runner.ColdKiller'
 
@@ -35,8 +36,12 @@ if __name__ == "__main__":
         print "Usage: python cold.py [node_config.cold]\n"
         exit()
 
-    parser = ConfigParser(sys.argv[1])
-    conf = parser.parse()
+    try:
+        parser = ConfigParser(sys.argv[1])
+        conf = parser.read_node_config()
 
-    clean_paths()
-    clean_jvms(conf)
+        clean_paths()
+        clean_jvms(conf)
+
+     except exception.ValidationException, e:
+        print 'Configuration error: ' + e.value

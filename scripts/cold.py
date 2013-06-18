@@ -6,6 +6,7 @@ import shutil
 from time import sleep
 import clean
 from config_parser import ConfigParser
+import exception
 
 
 NODES_DIR = 'nodes'
@@ -73,8 +74,11 @@ if __name__ == "__main__":
     clean.clean_paths()
 
     parser = ConfigParser(sys.argv[1])
-    conf = parser.parse()
+    try:
+        conf = parser.parse()
 
+        distribute(conf)
+        run_nodes(conf)
+    except exception.ValidationException, e:
+        print 'Configuration error: ' + e.value
 
-    distribute(conf)
-    run_nodes(conf)
